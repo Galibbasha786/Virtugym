@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use MongoDB\Laravel\Eloquent\Model;
+
+class Booking extends Model
+{
+    protected $connection = 'mongodb';
+    protected $collection = 'bookings';
+    
+    protected $fillable = [
+        'trainee_id', 'trainer_id', 'session_date', 'session_time',
+        'duration_minutes', 'status', 'amount', 'payment_id',
+        'notes', 'cancelled_at', 'completed_at'
+    ];
+    
+    protected $casts = [
+        'session_date' => 'datetime',
+        'amount' => 'float',
+        'cancelled_at' => 'datetime',
+        'completed_at' => 'datetime',
+    ];
+    
+    public function trainee()
+    {
+        return $this->belongsTo(User::class, 'trainee_id');
+    }
+    
+    public function trainer()
+    {
+        return $this->belongsTo(User::class, 'trainer_id');
+    }
+    
+    public function payment()
+    {
+        return $this->belongsTo(Payment::class);
+    }
+}

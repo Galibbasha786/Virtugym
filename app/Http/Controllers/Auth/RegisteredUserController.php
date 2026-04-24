@@ -25,6 +25,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['nullable', 'string', 'in:trainee,trainer'],  // <--- ADD THIS LINE HERE in validation
             'age' => ['nullable', 'integer', 'min:10', 'max:120'],
             'gender' => ['nullable', 'string'],
             'weight' => ['nullable', 'numeric', 'min:20', 'max:300'],
@@ -41,6 +42,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role ?? 'trainee',  // <--- ADD THIS LINE HERE in create array
             'age' => $request->age,
             'gender' => $request->gender,
             'weight' => $request->weight,

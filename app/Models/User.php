@@ -13,10 +13,15 @@ class User extends Authenticatable
     protected $collection = 'users';
     
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'role',  // Add role field
         'age', 'gender', 'weight', 'height',
         'fitness_level', 'goal', 'equipment', 
-        'workout_days', 'workout_duration', 'injuries'
+        'workout_days', 'workout_duration', 'injuries',
+        // Trainer specific fields
+        'bio', 'experience_years', 'specialization', 'hourly_rate', 
+        'certifications', 'is_verified', 'rating', 'total_clients',
+        // Payment fields
+        'razorpay_id', 'stripe_id'
     ];
     
     protected $hidden = [
@@ -31,6 +36,11 @@ class User extends Authenticatable
         'height' => 'float',
         'workout_days' => 'integer',
         'workout_duration' => 'integer',
+        'experience_years' => 'integer',
+        'hourly_rate' => 'float',
+        'is_verified' => 'boolean',
+        'rating' => 'float',
+        'total_clients' => 'integer',
     ];
     
     public function workouts()
@@ -41,5 +51,27 @@ class User extends Authenticatable
     public function progressMetrics()
     {
         return $this->hasMany(ProgressMetric::class);
+    }
+    
+    // Trainer relationships
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'trainer_id');
+    }
+    
+    public function clients()
+    {
+        return $this->hasMany(Booking::class, 'trainer_id')->where('status', 'active');
+    }
+    
+    // Trainee relationships
+    public function myTrainers()
+    {
+        return $this->hasMany(Booking::class, 'trainee_id')->where('status', 'active');
+    }
+    
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }
