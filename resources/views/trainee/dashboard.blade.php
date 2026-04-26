@@ -81,9 +81,16 @@
                             <p class="text-sm text-gray-500">{{ $trainer->specialization ?? 'Personal Trainer' }}</p>
                             <p class="text-purple-600 font-bold mt-1">₹{{ $trainer->hourly_rate ?? 500 }}/hr</p>
                             <p class="text-xs text-gray-400">⭐ {{ $trainer->rating ?? '4.8' }} ({{ $trainer->total_clients ?? 0 }} clients)</p>
-                            <a href="{{ route('book.trainer.create', $trainer->id) }}" class="mt-3 inline-block bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-lg text-sm hover:shadow-lg transition">
-                                Book Now
-                            </a>
+                            <div class="flex space-x-2 mt-3">
+    <a href="{{ route('chat.index', $trainer->id) }}" 
+       class="flex-1 text-center bg-gray-600 text-white px-4 py-1 rounded-lg text-sm hover:bg-gray-700 transition">
+        💬 Chat
+    </a>
+    <a href="{{ route('book.trainer.create', $trainer->id) }}" 
+       class="flex-1 text-center bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-lg text-sm hover:shadow-lg transition">
+        Book Now
+    </a>
+</div>
                         </div>
                     @endforeach
                 @else

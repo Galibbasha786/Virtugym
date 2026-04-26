@@ -4,6 +4,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Trainer\TrainerDashboardController;
 use App\Http\Controllers\Trainee\TraineeDashboardController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\AnalyticsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,7 +31,7 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('dashboard');
     
-    // CO3 - Resource Controller with only specific methods
+    // CO3 - Resource Controller (this creates bookings.index automatically)
     Route::resource('bookings', BookingController::class)->only(['index', 'update']);
     
     // CO3 - Named routes for booking payment
@@ -38,8 +40,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment-success', [BookingController::class, 'paymentSuccess'])->name('payment.success');
     Route::get('/payment-failed', [BookingController::class, 'paymentFailed'])->name('payment.failed');
     
-    // Alternative route for my-bookings (if you prefer this name)
-    Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.index');
+    // Chat Routes
+    Route::get('/chat/{trainer_id?}', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/messages/{trainer_id}', [ChatController::class, 'getMessages'])->name('chat.messages');
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+    Route::get('/chat/unread/count', [ChatController::class, 'getUnreadCount'])->name('chat.unread');
+    
+    // Analytics Routes
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     
     // CO3 - Route group with prefix and name for Admin
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {

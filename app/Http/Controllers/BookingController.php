@@ -234,4 +234,22 @@ class BookingController extends Controller
         
         return redirect()->back()->with('success', 'Booking status updated!');
     }
+    private function sendBookingConfirmation($booking)
+{
+    $trainee = User::find($booking->trainee_id);
+    $trainer = User::find($booking->trainer_id);
+    
+    try {
+        // Send email to trainee
+        Mail::to($trainee->email)->send(new \App\Mail\BookingConfirmation($booking, $trainee, $trainer));
+        
+        // Send email to trainer
+        Mail::to($trainer->email)->send(new \App\Mail\BookingConfirmation($booking, $trainee, $trainer));
+        
+        \Log::info('Booking confirmation emails sent to: ' . $trainee->email . ' and ' . $trainer->email);
+        
+    } catch (\Exception $e) {
+        \Log::error('Email sending failed: ' . $e->getMessage());
+    }
+}
 }

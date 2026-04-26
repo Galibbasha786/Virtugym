@@ -177,6 +177,16 @@
                         <span class="text-xl">📊</span>
                         <span class="font-medium">Dashboard</span>
                     </a>
+                    <a href="{{ route('analytics.index') }}" class="sidebar-item flex items-center space-x-3 px-4 py-3 text-gray-700">
+    <span class="text-xl">📊</span>
+    <span class="font-medium">Analytics</span>
+</a>
+
+<a href="{{ route('chat.index') }}" class="sidebar-item flex items-center space-x-3 px-4 py-3 text-gray-700">
+    <span class="text-xl">💬</span>
+    <span class="font-medium">Messages</span>
+    <span id="unreadBadge" class="hidden bg-red-500 text-white text-xs px-1 rounded-full"></span>
+</a>
                 </nav>
                 
                 <hr class="my-4 border-gray-200">
