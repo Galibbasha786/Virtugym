@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Trainer\TrainerDashboardController;
 use App\Http\Controllers\Trainee\TraineeDashboardController;
@@ -9,10 +10,13 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-// Authenticated routes
+// CO3 - Auth routes (default Laravel)
+require __DIR__.'/auth.php';
+
+// CO3 - Authenticated routes group with middleware
 Route::middleware(['auth'])->group(function () {
     
-    // Role-based redirect
+    // CO3 - Named route for dashboard redirect
     Route::get('/dashboard', function () {
         $role = auth()->user()->role ?? 'trainee';
         
@@ -25,7 +29,19 @@ Route::middleware(['auth'])->group(function () {
         }
     })->name('dashboard');
     
-    // Admin Routes
+    // CO3 - Resource Controller with only specific methods
+    Route::resource('bookings', BookingController::class)->only(['index', 'update']);
+    
+    // CO3 - Named routes for booking payment
+    Route::get('/book-trainer/{id}', [BookingController::class, 'create'])->name('book.trainer.create');
+    Route::post('/initiate-payment/{trainer_id}', [BookingController::class, 'initiatePayment'])->name('initiate.payment');
+    Route::post('/payment-success', [BookingController::class, 'paymentSuccess'])->name('payment.success');
+    Route::get('/payment-failed', [BookingController::class, 'paymentFailed'])->name('payment.failed');
+    
+    // Alternative route for my-bookings (if you prefer this name)
+    Route::get('/my-bookings', [BookingController::class, 'index'])->name('bookings.index');
+    
+    // CO3 - Route group with prefix and name for Admin
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
@@ -34,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings');
     });
     
-    // Trainer Routes
+    // CO3 - Route group with prefix and name for Trainer
     Route::middleware(['role:trainer'])->prefix('trainer')->name('trainer.')->group(function () {
         Route::get('/dashboard', [TrainerDashboardController::class, 'index'])->name('dashboard');
         Route::get('/clients', [TrainerDashboardController::class, 'clients'])->name('clients');
@@ -42,14 +58,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/profile/update', [TrainerDashboardController::class, 'updateProfile'])->name('profile.update');
     });
     
-    // Trainee Routes
+    // CO3 - Route group with prefix and name for Trainee
     Route::middleware(['role:trainee'])->prefix('trainee')->name('trainee.')->group(function () {
         Route::get('/dashboard', [TraineeDashboardController::class, 'index'])->name('dashboard');
         Route::get('/trainers', [TraineeDashboardController::class, 'trainers'])->name('trainers');
         Route::get('/trainers/{id}/book', [TraineeDashboardController::class, 'bookTrainer'])->name('book-trainer');
-        Route::get('/my-bookings', [TraineeDashboardController::class, 'myBookings'])->name('my-bookings');
-        Route::get('/my-workouts', [TraineeDashboardController::class, 'myWorkouts'])->name('my-workouts');
     });
 });
-
-require __DIR__.'/auth.php';

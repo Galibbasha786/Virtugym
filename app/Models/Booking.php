@@ -12,7 +12,7 @@ class Booking extends Model
     protected $fillable = [
         'trainee_id', 'trainer_id', 'session_date', 'session_time',
         'duration_minutes', 'status', 'amount', 'payment_id',
-        'notes', 'cancelled_at', 'completed_at'
+        'special_requests', 'cancelled_at', 'completed_at'
     ];
     
     protected $casts = [
@@ -22,6 +22,7 @@ class Booking extends Model
         'completed_at' => 'datetime',
     ];
     
+    // Relationships (CO6 - Eloquent ORM Relationships)
     public function trainee()
     {
         return $this->belongsTo(User::class, 'trainee_id');

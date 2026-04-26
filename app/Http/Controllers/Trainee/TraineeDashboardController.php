@@ -33,19 +33,18 @@ class TraineeDashboardController extends Controller
             ->orderBy('session_date', 'asc')
             ->limit(5)
             ->get();
-            
+        
+        // FIXED: Get ALL trainers (not just verified)
         $availableTrainers = User::where('role', 'trainer')
-            ->where('is_verified', true)
-            ->limit(6)
-            ->get();
+            ->get();  // Removed the is_verified condition temporarily
         
         return view('trainee.dashboard', compact('stats', 'recentWorkouts', 'upcomingSessions', 'availableTrainers'));
     }
     
     public function trainers()
     {
+        // FIXED: Get ALL trainers
         $trainers = User::where('role', 'trainer')
-            ->where('is_verified', true)
             ->paginate(12);
             
         return view('trainee.trainers', compact('trainers'));
@@ -54,25 +53,6 @@ class TraineeDashboardController extends Controller
     public function bookTrainer($id)
     {
         $trainer = User::findOrFail($id);
-        return view('trainee.book-trainer', compact('trainer'));
-    }
-    
-    public function myBookings()
-    {
-        $bookings = Booking::where('trainee_id', Auth::id())
-            ->with('trainer')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-            
-        return view('trainee.my-bookings', compact('bookings'));
-    }
-    
-    public function myWorkouts()
-    {
-        $workouts = Workout::where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-            
-        return view('trainee.my-workouts', compact('workouts'));
+        return view('bookings.create', compact('trainer'));
     }
 }

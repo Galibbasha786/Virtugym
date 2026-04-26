@@ -43,7 +43,7 @@
             <div class="bg-purple-50 rounded-xl p-6 mt-6">
                 <h3 class="font-bold text-purple-800 mb-2">Ready to add this exercise?</h3>
                 <p class="text-purple-700 text-sm mb-4">Add this exercise to your next workout</p>
-                <a href="{{ route('workouts.create') }}?exercise={{ $exercise->id }}" 
+                <a href="#?exercise={{ $exercise->id }}" 
                    class="btn-gradient text-white px-6 py-2 rounded-xl inline-block">
                     Add to Workout →
                 </a>

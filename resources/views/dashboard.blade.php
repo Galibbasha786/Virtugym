@@ -109,7 +109,7 @@
                 <div class="text-center py-8">
                     <div class="text-4xl mb-2">🏋️</div>
                     <p class="text-gray-500">No workouts yet</p>
-                    <a href="{{ route('workouts.create') }}" class="inline-block mt-3 text-purple-600 hover:text-purple-700 text-sm font-semibold">
+                    <a href="#" class="inline-block mt-3 text-purple-600 hover:text-purple-700 text-sm font-semibold">
                         Create your first workout →
                     </a>
                 </div>
@@ -158,7 +158,7 @@
             <div class="text-3xl mb-2">💪</div>
             <h3 class="font-bold mb-2">Start Workout</h3>
             <p class="text-sm text-blue-100 mb-3">Begin your training session</p>
-            <a href="{{ route('workouts.create') }}" class="inline-block bg-white text-blue-600 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
+            <a href="#" class="inline-block bg-white text-blue-600 px-4 py-1 rounded-lg text-sm font-semibold hover:bg-gray-100">
                 Start Now
             </a>
         </div>
