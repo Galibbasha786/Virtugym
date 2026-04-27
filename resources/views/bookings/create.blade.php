@@ -13,65 +13,54 @@
         <form method="POST" action="{{ route('initiate.payment', $trainer->id) }}" class="p-6">
             @csrf
             
-            <!-- CO5 - Display Validation Errors -->
             @if($errors->any())
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-                    <ul>
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                    @foreach($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                    @endforeach
                 </div>
             @endif
             
-            <!-- CO5 - Old Input Repopulation -->
+            <!-- Date Selection -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Select Date *</label>
-                <input type="date" name="session_date" value="{{ old('session_date') }}" 
-                       class="w-full px-4 py-2 border rounded-lg focus:border-purple-500 focus:outline-none"
+                <label class="block text-gray-700 font-semibold mb-2">Select Date</label>
+                <input type="date" name="session_date" id="session_date" 
+                       class="w-full px-4 py-2 border rounded-lg"
                        min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
             </div>
             
+            <!-- Time Slot Selection -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Select Time *</label>
-                <select name="session_time" class="w-full px-4 py-2 border rounded-lg focus:border-purple-500 focus:outline-none" required>
-                    <option value="">Select time slot</option>
-                    <option value="09:00" {{ old('session_time') == '09:00' ? 'selected' : '' }}>9:00 AM</option>
-                    <option value="10:00" {{ old('session_time') == '10:00' ? 'selected' : '' }}>10:00 AM</option>
-                    <option value="11:00" {{ old('session_time') == '11:00' ? 'selected' : '' }}>11:00 AM</option>
-                    <option value="14:00" {{ old('session_time') == '14:00' ? 'selected' : '' }}>2:00 PM</option>
-                    <option value="15:00" {{ old('session_time') == '15:00' ? 'selected' : '' }}>3:00 PM</option>
-                    <option value="16:00" {{ old('session_time') == '16:00' ? 'selected' : '' }}>4:00 PM</option>
+                <label class="block text-gray-700 font-semibold mb-2">Select Time</label>
+                <select name="session_time" id="session_time" class="w-full px-4 py-2 border rounded-lg" required>
+                    <option value="">Choose a date first</option>
                 </select>
             </div>
             
+            <!-- Duration -->
             <div class="mb-4">
-                <label class="block text-gray-700 font-semibold mb-2">Duration (minutes) *</label>
-                <select name="duration" class="w-full px-4 py-2 border rounded-lg focus:border-purple-500 focus:outline-none" required>
-                    <option value="30" {{ old('duration') == '30' ? 'selected' : '' }}>30 minutes - ₹250</option>
-                    <option value="45" {{ old('duration') == '45' ? 'selected' : '' }}>45 minutes - ₹375</option>
-                    <option value="60" {{ old('duration') == '60' ? 'selected' : '' }}>60 minutes - ₹500</option>
-                    <option value="90" {{ old('duration') == '90' ? 'selected' : '' }}>90 minutes - ₹750</option>
-                    <option value="120" {{ old('duration') == '120' ? 'selected' : '' }}>120 minutes - ₹1000</option>
+                <label class="block text-gray-700 font-semibold mb-2">Duration (minutes)</label>
+                <select name="duration" id="duration" class="w-full px-4 py-2 border rounded-lg" required>
+                    <option value="30">30 minutes - ₹{{ ($trainer->hourly_rate ?? 500) / 2 }}</option>
+                    <option value="60" selected>60 minutes - ₹{{ $trainer->hourly_rate ?? 500 }}</option>
+                    <option value="90">90 minutes - ₹{{ ($trainer->hourly_rate ?? 500) * 1.5 }}</option>
+                    <option value="120">120 minutes - ₹{{ ($trainer->hourly_rate ?? 500) * 2 }}</option>
                 </select>
             </div>
             
-            <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2">Special Requests (Optional)</label>
-                <textarea name="special_requests" rows="3" 
-                          class="w-full px-4 py-2 border rounded-lg focus:border-purple-500 focus:outline-none"
-                          placeholder="Any specific goals or injuries to note?">{{ old('special_requests') }}</textarea>
+            <!-- Special Requests -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold mb-2">Special Requests</label>
+                <textarea name="special_requests" rows="3" class="w-full px-4 py-2 border rounded-lg"></textarea>
             </div>
             
-            <div class="bg-purple-50 rounded-lg p-4 mb-6">
-                <p class="text-center text-gray-700">
-                    <span class="font-semibold">Total Amount:</span>
-                    <span class="text-2xl font-bold text-purple-600" id="amountDisplay">₹500</span>
-                </p>
-                <p class="text-xs text-gray-500 text-center mt-2">Secure payment powered by Razorpay</p>
+            <!-- Amount -->
+            <div class="bg-purple-50 rounded-lg p-4 mb-6 text-center">
+                <span class="font-semibold">Total Amount:</span>
+                <span class="text-2xl font-bold text-purple-600" id="amountDisplay">₹{{ $trainer->hourly_rate ?? 500 }}</span>
             </div>
             
-            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition">
+            <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold">
                 Proceed to Payment →
             </button>
         </form>
@@ -79,14 +68,44 @@
 </div>
 
 <script>
-    // Update amount based on duration selection
-    const durationSelect = document.querySelector('select[name="duration"]');
-    const amountDisplay = document.getElementById('amountDisplay');
+    const trainerId = '{{ $trainer->id }}';
+    const hourlyRate = {{ $trainer->hourly_rate ?? 500 }};
+    const dateInput = document.getElementById('session_date');
+    const timeSelect = document.getElementById('session_time');
     
-    durationSelect.addEventListener('change', function() {
-        const rates = {30: 250, 45: 375, 60: 500, 90: 750, 120: 1000};
-        const amount = rates[this.value] || 500;
-        amountDisplay.textContent = '₹' + amount;
+    dateInput.addEventListener('change', function() {
+        const date = this.value;
+        if (!date) return;
+        
+        timeSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        // Debug
+        console.log('Fetching slots for trainer:', trainerId, 'date:', date);
+        
+        fetch(`/trainer/available-slots/${trainerId}/${date}`)
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(slots => {
+                console.log('Slots received:', slots);
+                timeSelect.innerHTML = '<option value="">Select time slot</option>';
+                
+                if (slots && slots.length > 0) {
+                    slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.start_time;
+                        option.textContent = `${slot.start_time} - ${slot.end_time}`;
+                        timeSelect.appendChild(option);
+                    });
+                } else {
+                    timeSelect.innerHTML = '<option value="">No slots available on this date</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+            });
     });
 </script>
 @endsection

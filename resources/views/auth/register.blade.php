@@ -50,12 +50,12 @@
                 @error('fitness_level')<p class="err">{{ $message }}</p>@enderror
             </div>
             <div>
-    <label class="block text-gray-700 text-sm font-semibold mb-2">Register As</label>
-    <select name="role" required class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none">
-        <option value="trainee">👤 Trainee - I want to learn and train</option>
-        <option value="trainer">🏋️ Trainer - I want to teach and train others</option>
+    <label class="lbl">Register As</label>
+    <select name="role" required class="inp">
+        <option value="trainee">👤 Trainee</option>
+        <option value="trainer">🏋️ Trainer</option>
     </select>
-    @error('role') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+    @error('role')<p class="err">{{ $message }}</p>@enderror
 </div>
             <div>
                 <label class="lbl">Primary Goal</label>

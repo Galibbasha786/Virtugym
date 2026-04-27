@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\TrainerAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -20,14 +21,16 @@ class BookingController extends Controller
      */
     public function __construct()
     {
-        // Initialize Razorpay API with keys from .env
-        try {
-            $this->razorpay = new Api(
-                env('RAZORPAY_KEY'),
-                env('RAZORPAY_SECRET')
-            );
-        } catch (\Exception $e) {
-            \Log::error('Razorpay initialization failed: ' . $e->getMessage());
+        // Initialize Razorpay API
+        if (env('RAZORPAY_KEY') && env('RAZORPAY_SECRET')) {
+            try {
+                $this->razorpay = new Api(
+                    env('RAZORPAY_KEY'),
+                    env('RAZORPAY_SECRET')
+                );
+            } catch (\Exception $e) {
+                \Log::error('Razorpay initialization failed: ' . $e->getMessage());
+            }
         }
     }
     
@@ -51,66 +54,116 @@ class BookingController extends Controller
     }
     
     /**
-     * Initiate payment and create booking
+     * Initiate payment and create booking with availability check
      * POST /initiate-payment/{trainer_id}
      */
     public function initiatePayment(Request $request, $trainer_id)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
+{
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+    
+    $validator = Validator::make($request->all(), [
+        'session_date' => 'required|date|after:today',
+        'session_time' => 'required',
+        'duration' => 'required|integer|min:30|max:120',
+    ]);
+    
+    if ($validator->fails()) {
+        return redirect()->back()
+            ->withErrors($validator)
+            ->withInput();
+    }
+    
+    $trainer = User::findOrFail($trainer_id);
+    $amount = ($trainer->hourly_rate ?? 500) * ($request->duration / 60);
+    
+    // ===== AVAILABILITY CHECK (MongoDB Compatible) =====
+    $dayOfWeek = date('w', strtotime($request->session_date));
+    $sessionTime = $request->session_time;
+    
+    // Get all availability slots for this trainer on this day
+    // Check if trainer has availability for this time slot
+    $availabilities = TrainerAvailability::where('trainer_id', $trainer_id)
+        ->where('day_of_week', (int)$dayOfWeek)
+        ->where('is_booked', false)
+        ->get();
+    
+    $isAvailable = false;
+    $availabilitySlot = null;
+    foreach ($availabilities as $slot) {
+        $startTime = date('H:i', strtotime($slot->start_time));
+        $endTime = date('H:i', strtotime($slot->end_time));
         
-        $validator = Validator::make($request->all(), [
-            'session_date' => 'required|date|after:today',
-            'session_time' => 'required',
-            'duration' => 'required|integer|min:30|max:120',
-        ]);
-        
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-        
-        $trainer = User::findOrFail($trainer_id);
-        $amount = ($trainer->hourly_rate ?? 500) * ($request->duration / 60);
-        
-        try {
-            // Create Razorpay Order
-            $order = $this->razorpay->order->create([
-                'receipt' => 'booking_' . time(),
-                'amount' => $amount * 100, // Amount in paise
-                'currency' => 'INR',
-                'payment_capture' => 1
-            ]);
-            
-            // Store booking data in session
-            session([
-                'pending_booking' => [
-                    'trainer_id' => $trainer_id,
-                    'session_date' => $request->session_date,
-                    'session_time' => $request->session_time,
-                    'duration' => $request->duration,
-                    'amount' => $amount,
-                    'order_id' => $order->id
-                ]
-            ]);
-            
-            return view('payments.razorpay', [
-                'order' => $order,
-                'amount' => $amount,
-                'trainer' => $trainer,
-                'razorpay_key' => env('RAZORPAY_KEY')
-            ]);
-            
-        } catch (\Exception $e) {
-            \Log::error('Razorpay order creation failed: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Payment initialization failed: ' . $e->getMessage());
+        if ($sessionTime >= $startTime && $sessionTime <= $endTime) {
+            $isAvailable = true;
+            $availabilitySlot = $slot;
+            break;
         }
     }
     
+    if (!$isAvailable) {
+        return redirect()->back()->with('error', 'Trainer is not available at this time. Please select another time slot.');
+    }
+    
+    // Check if this time slot is already booked for this specific date
+    $sessionDateTime = $request->session_date . ' ' . $sessionTime;
+    $existingBooking = Booking::where('trainer_id', $trainer_id)
+        ->whereDate('session_date', $request->session_date)
+        ->where('status', 'confirmed')
+        ->get()
+        ->filter(function($booking) use ($sessionTime) {
+            return date('H:i', strtotime($booking->session_date)) == $sessionTime;
+        })
+        ->count();
+    
+    if ($existingBooking > 0) {
+        return redirect()->back()->with('error', 'This time slot is already booked. Please select another time.');
+    }
+    // ===== END AVAILABILITY CHECK =====
+    
+    // ===== INITIALIZE PAYMENT (Razorpay) =====
+    // Store pending booking details in session
+    session([
+        'pending_booking' => [
+            'trainer_id' => $trainer_id,
+            'session_date' => $request->session_date,
+            'session_time' => $request->session_time,
+            'duration' => $request->duration,
+            'amount' => $amount
+        ]
+    ]);
+    
+    if (!$this->razorpay) {
+        return redirect()->back()->with('error', 'Payment gateway is not configured properly.');
+    }
+    
+    try {
+        // Create Razorpay Order
+        $orderData = [
+            'receipt'         => 'rcptid_' . time(),
+            'amount'          => $amount * 100, // Amount in paise
+            'currency'        => 'INR',
+            'payment_capture' => 1 // auto capture
+        ];
+        
+        $razorpayOrder = $this->razorpay->order->create($orderData);
+        
+        return view('payments.razorpay', [
+            'order' => $razorpayOrder,
+            'trainer' => $trainer,
+            'amount' => $amount,
+            'razorpay_key' => env('RAZORPAY_KEY')
+        ]);
+        
+    } catch (\Exception $e) {
+        \Log::error('Razorpay Order Creation Failed: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Payment initialization failed: ' . $e->getMessage());
+    }
+}
+    
     /**
-     * Handle payment success
+     * Handle payment success (Real Razorpay)
      * POST /payment-success
      */
     public function paymentSuccess(Request $request)
@@ -129,21 +182,47 @@ class BookingController extends Controller
         ];
         
         try {
-            // Verify payment signature
             $this->razorpay->utility->verifyPaymentSignature($attributes);
             
-            // Create booking
+            $sessionDateTime = $pendingBooking['session_date'] . ' ' . $pendingBooking['session_time'];
+            $dayOfWeek = date('w', strtotime($pendingBooking['session_date']));
+            $sessionTime = date('H:i', strtotime($pendingBooking['session_time']));
+            
+            // Get availability slot
+            $availabilities = TrainerAvailability::where('trainer_id', $pendingBooking['trainer_id'])
+                ->where('day_of_week', (int)$dayOfWeek)
+                ->where('is_booked', false)
+                ->get();
+            
+            $availability = null;
+            foreach ($availabilities as $slot) {
+                $startTime = date('H:i', strtotime($slot->start_time));
+                $endTime = date('H:i', strtotime($slot->end_time));
+                
+                if ($sessionTime >= $startTime && $sessionTime <= $endTime) {
+                    $availability = $slot;
+                    break;
+                }
+            }
+            
             $booking = Booking::create([
                 'trainee_id' => Auth::id(),
                 'trainer_id' => $pendingBooking['trainer_id'],
-                'session_date' => $pendingBooking['session_date'] . ' ' . $pendingBooking['session_time'],
+                'session_date' => $sessionDateTime,
                 'duration_minutes' => $pendingBooking['duration'],
                 'amount' => $pendingBooking['amount'],
                 'status' => 'confirmed',
                 'payment_id' => $request->razorpay_payment_id
             ]);
             
-            // Create payment record
+            // Mark availability slot as booked
+            if ($availability) {
+                $availability->update([
+                    'is_booked' => true,
+                    'booking_id' => $booking->id
+                ]);
+            }
+            
             Payment::create([
                 'user_id' => Auth::id(),
                 'booking_id' => $booking->id,
@@ -156,15 +235,51 @@ class BookingController extends Controller
                 'paid_at' => now()
             ]);
             
+            // Send email confirmation
+            $this->sendBookingConfirmation($booking);
+            
             session()->forget('pending_booking');
             
             return redirect()->route('bookings.index')
-                ->with('success', 'Payment successful! Booking confirmed.');
+                ->with('success', 'Payment successful! Booking confirmed. Check your email.');
                 
         } catch (\Exception $e) {
             \Log::error('Payment verification failed: ' . $e->getMessage());
             return redirect()->route('trainee.trainers')
                 ->with('error', 'Payment verification failed. Please try again.');
+        }
+    }
+    
+    /**
+     * Send email confirmation to both parties
+     */
+    private function sendBookingConfirmation($booking)
+    {
+        $trainee = User::find($booking->trainee_id);
+        $trainer = User::find($booking->trainer_id);
+        
+        try {
+            Mail::send('emails.booking-confirmation', [
+                'trainee' => $trainee,
+                'trainer' => $trainer,
+                'booking' => $booking
+            ], function($message) use ($trainee) {
+                $message->to($trainee->email, $trainee->name)
+                        ->subject('Booking Confirmation - VirtuGym');
+            });
+            
+            Mail::send('emails.booking-confirmation-trainer', [
+                'trainee' => $trainee,
+                'trainer' => $trainer,
+                'booking' => $booking
+            ], function($message) use ($trainer) {
+                $message->to($trainer->email, $trainer->name)
+                        ->subject('New Booking Notification - VirtuGym');
+            });
+            
+            \Log::info('Booking confirmation emails sent');
+        } catch (\Exception $e) {
+            \Log::error('Email sending failed: ' . $e->getMessage());
         }
     }
     
@@ -224,32 +339,24 @@ class BookingController extends Controller
             return redirect()->back()->withErrors($validator);
         }
         
+        $oldStatus = $booking->status;
         $booking->update(['status' => $request->status]);
         
         if ($request->status == 'completed') {
             $booking->update(['completed_at' => now()]);
         } elseif ($request->status == 'cancelled') {
             $booking->update(['cancelled_at' => now()]);
+            
+            // Free up the availability slot if booking is cancelled
+            $availability = TrainerAvailability::where('booking_id', $booking->id)->first();
+            if ($availability) {
+                $availability->update([
+                    'is_booked' => false,
+                    'booking_id' => null
+                ]);
+            }
         }
         
         return redirect()->back()->with('success', 'Booking status updated!');
     }
-    private function sendBookingConfirmation($booking)
-{
-    $trainee = User::find($booking->trainee_id);
-    $trainer = User::find($booking->trainer_id);
-    
-    try {
-        // Send email to trainee
-        Mail::to($trainee->email)->send(new \App\Mail\BookingConfirmation($booking, $trainee, $trainer));
-        
-        // Send email to trainer
-        Mail::to($trainer->email)->send(new \App\Mail\BookingConfirmation($booking, $trainee, $trainer));
-        
-        \Log::info('Booking confirmation emails sent to: ' . $trainee->email . ' and ' . $trainer->email);
-        
-    } catch (\Exception $e) {
-        \Log::error('Email sending failed: ' . $e->getMessage());
-    }
-}
 }

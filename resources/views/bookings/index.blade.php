@@ -12,7 +12,7 @@
         </div>
     @endif
     
-    @if($bookings->count() > 0)
+    @if(isset($bookings) && $bookings->count() > 0)
         <div class="space-y-4">
             @foreach($bookings as $booking)
                 <div class="bg-white rounded-xl shadow-lg p-6">
@@ -20,11 +20,13 @@
                         <div>
                             @if(Auth::user()->role == 'trainer')
                                 <h3 class="text-xl font-bold text-purple-600">{{ $booking->trainee->name ?? 'Trainee' }}</h3>
+                                <p class="text-sm text-gray-500">Trainee</p>
                             @else
                                 <h3 class="text-xl font-bold text-purple-600">{{ $booking->trainer->name ?? 'Trainer' }}</h3>
+                                <p class="text-sm text-gray-500">{{ $booking->trainer->specialization ?? 'Personal Trainer' }}</p>
                             @endif
                             
-                            <p class="text-gray-600 mt-1">
+                            <p class="text-gray-600 mt-2">
                                 📅 {{ \Carbon\Carbon::parse($booking->session_date)->format('F d, Y') }} at 
                                 ⏰ {{ \Carbon\Carbon::parse($booking->session_date)->format('h:i A') }}
                             </p>
@@ -36,9 +38,35 @@
                                 <p class="text-gray-500 text-sm mt-1">📝 {{ $booking->special_requests }}</p>
                             @endif
                         </div>
+                        
                         <div class="text-right">
+                            @php
+                                $sessionTime = strtotime($booking->session_date);
+                                $now = time();
+                                $canJoin = ($now >= $sessionTime - 900); // 15 minutes before
+                                $isUpcoming = ($sessionTime > $now);
+                            @endphp
+                            
                             @if($booking->status == 'confirmed')
                                 <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">✓ Confirmed</span>
+                                
+                                <!-- Video Call Button - Shows for BOTH Trainer and Trainee -->
+                                @if($canJoin)
+                                    <a href="{{ route('video-call.join', $booking->id) }}" 
+                                       class="mt-2 inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
+                                        🎥 Join Video Session
+                                    </a>
+                                @elseif($isUpcoming)
+                                    <p class="text-xs text-gray-400 mt-2">
+                                        ⏰ Session available {{ ceil(($sessionTime - 900 - $now) / 60) }} minutes before scheduled time
+                                    </p>
+                                @else
+                                    <p class="text-xs text-gray-400 mt-2">
+                                        ⏰ Session time has passed
+                                    </p>
+                                @endif
+                                
+                                <!-- Trainer Status Update -->
                                 @if(Auth::user()->role == 'trainer')
                                     <form method="POST" action="{{ route('bookings.update', $booking->id) }}" class="mt-2">
                                         @csrf
@@ -50,6 +78,7 @@
                                         </select>
                                     </form>
                                 @endif
+                                
                             @elseif($booking->status == 'completed')
                                 <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">✓ Completed</span>
                             @elseif($booking->status == 'cancelled')

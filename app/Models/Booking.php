@@ -12,7 +12,8 @@ class Booking extends Model
     protected $fillable = [
         'trainee_id', 'trainer_id', 'session_date', 'session_time',
         'duration_minutes', 'status', 'amount', 'payment_id',
-        'special_requests', 'cancelled_at', 'completed_at'
+        'special_requests', 'cancelled_at', 'completed_at',
+        'meeting_id', 'meeting_link', 'meeting_started', 'meeting_ended'
     ];
     
     protected $casts = [
@@ -20,6 +21,8 @@ class Booking extends Model
         'amount' => 'float',
         'cancelled_at' => 'datetime',
         'completed_at' => 'datetime',
+        'meeting_started' => 'boolean',
+'meeting_ended' => 'boolean',
     ];
     
     // Relationships (CO6 - Eloquent ORM Relationships)

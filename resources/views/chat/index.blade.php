@@ -3,106 +3,129 @@
 @section('title', 'Messages')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Messages 💬</h1>
-    
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="grid md:grid-cols-3 h-[600px]">
-            <!-- Conversations List -->
-            <div class="border-r bg-gray-50">
-                <div class="p-4 border-b bg-white">
-                    <h2 class="font-bold">Conversations</h2>
-                </div>
-                <div class="overflow-y-auto h-[540px]">
-                    @php
-                        use App\Models\Message;
-                        use App\Models\User;
-                        $uniqueUsers = [];
-                        $convList = [];
-                        if(isset($conversations)) {
-                            foreach($conversations as $conv) {
-                                $otherId = ($conv->sender_id == Auth::id()) ? $conv->receiver_id : $conv->sender_id;
-                                if(!in_array($otherId, $uniqueUsers)) {
-                                    $uniqueUsers[] = $otherId;
-                                    $otherUser = User::find($otherId);
-                                    if($otherUser) {
-                                        $unread = Message::where('receiver_id', Auth::id())
-                                            ->where('sender_id', $otherId)
-                                            ->where('is_read', false)
-                                            ->count();
-                                        $convList[] = ['user' => $otherUser, 'last_message' => $conv->message, 'unread' => $unread];
-                                    }
+<div style="max-width:1280px;margin:0 auto;">
+
+    <h1 style="font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#fff 20%,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:1.5rem;" class="fade-in-up">
+        💬 Messages
+    </h1>
+
+    <div class="fade-in-up" style="background:rgba(255,255,255,.03);border:1px solid rgba(139,92,246,.18);border-radius:24px;overflow:hidden;height:620px;display:grid;grid-template-columns:280px 1fr;">
+
+        {{-- Conversation List --}}
+        <div style="border-right:1px solid rgba(139,92,246,.15);display:flex;flex-direction:column;">
+            <div style="padding:1.1rem 1.2rem;border-bottom:1px solid rgba(139,92,246,.12);background:rgba(139,92,246,.06);">
+                <h2 style="font-size:.88rem;font-weight:700;color:#c4b5fd;letter-spacing:.04em;">CONVERSATIONS</h2>
+            </div>
+            <div style="overflow-y:auto;flex:1;">
+                @php
+                    use App\Models\Message;
+                    use App\Models\User;
+                    $uniqueUsers = [];
+                    $convList = [];
+                    if(isset($conversations)) {
+                        foreach($conversations as $conv) {
+                            $otherId = ($conv->sender_id == Auth::id()) ? $conv->receiver_id : $conv->sender_id;
+                            if(!in_array($otherId, $uniqueUsers)) {
+                                $uniqueUsers[] = $otherId;
+                                $otherUser = User::find($otherId);
+                                if($otherUser) {
+                                    $unread = Message::where('receiver_id', Auth::id())
+                                        ->where('sender_id', $otherId)
+                                        ->where('is_read', false)
+                                        ->count();
+                                    $convList[] = ['user' => $otherUser, 'last_message' => $conv->message, 'unread' => $unread];
                                 }
                             }
                         }
-                    @endphp
-                    
-                    @if(count($convList) > 0)
-                        @foreach($convList as $item)
-                            <a href="{{ url('/chat/' . $item['user']->id) }}" 
-                               class="block p-4 hover:bg-gray-100 border-b transition">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
-                                        {{ strtoupper(substr($item['user']->name, 0, 1)) }}
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="font-semibold">{{ $item['user']->name }}</p>
-                                        <p class="text-sm text-gray-500 truncate">{{ Str::limit($item['last_message'], 40) }}</p>
-                                    </div>
-                                    @if($item['unread'] > 0)
-                                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ $item['unread'] }}</span>
-                                    @endif
+                    }
+                @endphp
+
+                @if(count($convList) > 0)
+                    @foreach($convList as $item)
+                        @php $isActive = isset($selectedTrainer) && $selectedTrainer && $selectedTrainer->id == $item['user']->id; @endphp
+                        <a href="{{ url('/chat/' . $item['user']->id) }}"
+                           style="display:block;padding:14px 16px;border-bottom:1px solid rgba(139,92,246,.08);text-decoration:none;transition:background .2s;{{ $isActive ? 'background:rgba(139,92,246,.15);' : '' }}"
+                           onmouseover="this.style.background='rgba(139,92,246,.1)'"
+                           onmouseout="this.style.background='{{ $isActive ? 'rgba(139,92,246,.15)' : 'transparent' }}'">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#fff;flex-shrink:0;">
+                                    {{ strtoupper(substr($item['user']->name, 0, 1)) }}
                                 </div>
-                            </a>
-                        @endforeach
-                    @else
-                        <div class="text-center py-8 text-gray-500">
-                            No conversations yet
-                        </div>
-                    @endif
-                </div>
-            </div>
-            
-            <!-- Chat Area -->
-            <div class="md:col-span-2 flex flex-col">
-                @if(isset($selectedTrainer) && $selectedTrainer)
-                    <div class="p-4 border-b bg-white">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
-                                {{ strtoupper(substr($selectedTrainer->name, 0, 1)) }}
+                                <div style="flex:1;min-width:0;">
+                                    <p style="font-size:.85rem;font-weight:600;color:#e2d9f3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $item['user']->name }}</p>
+                                    <p style="font-size:.73rem;color:rgba(255,255,255,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;">{{ Str::limit($item['last_message'], 35) }}</p>
+                                </div>
+                                @if($item['unread'] > 0)
+                                    <span style="background:#ef4444;color:#fff;font-size:.65rem;padding:2px 7px;border-radius:50px;font-weight:700;flex-shrink:0;">{{ $item['unread'] }}</span>
+                                @endif
                             </div>
-                            <div>
-                                <p class="font-semibold">{{ $selectedTrainer->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $selectedTrainer->specialization ?? 'Trainer' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50" style="height: 400px;">
-                        <div class="text-center text-gray-500">Loading messages...</div>
-                    </div>
-                    
-                    <div class="p-4 border-t bg-white">
-                        <form id="chatForm" class="flex space-x-2" onsubmit="return false;">
-                            @csrf
-                            <input type="hidden" name="receiver_id" value="{{ $selectedTrainer->id }}" id="receiverId">
-                            <input type="text" name="message" id="messageInput" 
-                                   class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
-                                   placeholder="Type your message..." autocomplete="off">
-                            <button type="button" id="sendButton" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition">
-                                Send
-                            </button>
-                        </form>
-                    </div>
+                        </a>
+                    @endforeach
                 @else
-                    <div class="flex items-center justify-center h-full text-gray-500">
-                        Select a conversation to start chatting
+                    <div style="text-align:center;padding:3rem 1rem;">
+                        <div style="font-size:2rem;opacity:.3;margin-bottom:.5rem;">💬</div>
+                        <p style="color:rgba(255,255,255,.25);font-size:.82rem;">No conversations yet</p>
                     </div>
                 @endif
             </div>
         </div>
+
+        {{-- Chat Area --}}
+        <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+            @if(isset($selectedTrainer) && $selectedTrainer)
+                {{-- Chat Header --}}
+                <div style="padding:14px 20px;border-bottom:1px solid rgba(139,92,246,.12);background:rgba(139,92,246,.06);display:flex;align-items:center;gap:12px;">
+                    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:800;color:#fff;flex-shrink:0;">
+                        {{ strtoupper(substr($selectedTrainer->name, 0, 1)) }}
+                    </div>
+                    <div>
+                        <p style="font-size:.9rem;font-weight:700;color:#e2d9f3;">{{ $selectedTrainer->name }}</p>
+                        <p style="font-size:.72rem;color:rgba(255,255,255,.3);">{{ $selectedTrainer->specialization ?? ucfirst($selectedTrainer->role ?? 'Trainer') }}</p>
+                    </div>
+                    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+                        <span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+                        <span style="font-size:.73rem;color:rgba(255,255,255,.3);">Online</span>
+                    </div>
+                </div>
+
+                {{-- Messages --}}
+                <div id="chatMessages" style="flex:1;overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:.7rem;background:rgba(0,0,0,.15);">
+                    <div style="text-align:center;color:rgba(255,255,255,.2);font-size:.8rem;">Loading messages…</div>
+                </div>
+
+                {{-- Input --}}
+                <div style="padding:14px 16px;border-top:1px solid rgba(139,92,246,.12);background:rgba(8,8,26,.6);">
+                    <form id="chatForm" style="display:flex;gap:.6rem;align-items:center;" onsubmit="return false;">
+                        @csrf
+                        <input type="hidden" name="receiver_id" value="{{ $selectedTrainer->id }}" id="receiverId">
+                        <input type="text" name="message" id="messageInput"
+                               style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(139,92,246,.25);border-radius:12px;padding:11px 16px;color:#fff;font-size:.88rem;outline:none;transition:border-color .2s;"
+                               placeholder="Type your message…" autocomplete="off"
+                               onfocus="this.style.borderColor='rgba(139,92,246,.6)'"
+                               onblur="this.style.borderColor='rgba(139,92,246,.25)'">
+                        <button type="button" id="sendButton"
+                                style="background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;border:none;border-radius:12px;padding:11px 22px;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 6px 16px rgba(139,92,246,.35);transition:all .2s;"
+                                onmouseover="this.style.boxShadow='0 10px 24px rgba(139,92,246,.55)';this.style.transform='translateY(-1px)'"
+                                onmouseout="this.style.boxShadow='0 6px 16px rgba(139,92,246,.35)';this.style.transform=''">
+                            Send ➤
+                        </button>
+                    </form>
+                </div>
+            @else
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+                    <div style="font-size:3rem;opacity:.25;">💬</div>
+                    <p style="color:rgba(255,255,255,.25);font-size:.9rem;">Select a conversation to start chatting</p>
+                </div>
+            @endif
+        </div>
     </div>
 </div>
+
+<style>
+    /* Custom scrollbar inside chat */
+    #chatMessages::-webkit-scrollbar { width: 4px; }
+    #chatMessages::-webkit-scrollbar-thumb { background: rgba(139,92,246,.4); border-radius: 4px; }
+</style>
 
 @if(isset($selectedTrainer) && $selectedTrainer)
 <script>
@@ -111,53 +134,57 @@
     const chatMessagesDiv = document.getElementById('chatMessages');
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
-    
+
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
+
     function loadMessages() {
         fetch('/chat/messages/' + trainerId)
-            .then(response => response.json())
+            .then(r => r.json())
             .then(messages => {
                 if (!chatMessagesDiv) return;
-                
                 chatMessagesDiv.innerHTML = '';
-                
+
                 if (messages.length === 0) {
-                    chatMessagesDiv.innerHTML = '<div class="text-center text-gray-500 py-8">No messages yet. Start the conversation!</div>';
+                    chatMessagesDiv.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,.2);font-size:.82rem;padding:2rem;">No messages yet. Start the conversation! 👋</div>';
                     return;
                 }
-                
+
                 messages.forEach(msg => {
                     const isOwn = msg.sender_id == currentUserId;
-                    const div = document.createElement('div');
-                    div.className = 'flex ' + (isOwn ? 'justify-end' : 'justify-start') + ' mb-3';
-                    
                     const date = new Date(msg.created_at);
-                    const timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    div.innerHTML = `
-                        <div class="max-w-[70%] ${isOwn ? 'bg-purple-600 text-white' : 'bg-white border'} rounded-lg p-3 shadow-sm">
-                            <p class="text-sm break-words">${escapeHtml(msg.message)}</p>
-                            <p class="text-xs ${isOwn ? 'text-purple-200' : 'text-gray-400'} mt-1">${timeStr}</p>
-                        </div>
-                    `;
-                    chatMessagesDiv.appendChild(div);
+                    const timeStr = date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                    const wrapper = document.createElement('div');
+                    wrapper.style.cssText = 'display:flex;' + (isOwn ? 'justify-content:flex-end;' : 'justify-content:flex-start;');
+
+                    if (isOwn) {
+                        wrapper.innerHTML = `
+                            <div style="max-width:65%;background:linear-gradient(135deg,#8b5cf6,#7c3aed);border-radius:18px 18px 4px 18px;padding:10px 14px;box-shadow:0 4px 12px rgba(139,92,246,.3);">
+                                <p style="font-size:.85rem;color:#fff;word-break:break-word;">${escapeHtml(msg.message)}</p>
+                                <p style="font-size:.65rem;color:rgba(255,255,255,.5);margin-top:4px;text-align:right;">${timeStr}</p>
+                            </div>`;
+                    } else {
+                        wrapper.innerHTML = `
+                            <div style="max-width:65%;background:rgba(255,255,255,.07);border:1px solid rgba(139,92,246,.2);border-radius:18px 18px 18px 4px;padding:10px 14px;">
+                                <p style="font-size:.85rem;color:#e2d9f3;word-break:break-word;">${escapeHtml(msg.message)}</p>
+                                <p style="font-size:.65rem;color:rgba(255,255,255,.3);margin-top:4px;">${timeStr}</p>
+                            </div>`;
+                    }
+                    chatMessagesDiv.appendChild(wrapper);
                 });
                 chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
             })
-            .catch(error => console.error('Error loading messages:', error));
+            .catch(e => console.error('Error loading messages:', e));
     }
-    
+
     function sendMessage() {
         const message = messageInput.value.trim();
-        const receiverId = document.getElementById('receiverId').value;
-        
         if (!message) return;
-        
+        const receiverId = document.getElementById('receiverId').value;
+
         fetch('/chat/send', {
             method: 'POST',
             headers: {
@@ -165,45 +192,21 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({
-                receiver_id: receiverId,
-                message: message
-            })
+            body: JSON.stringify({ receiver_id: receiverId, message })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            if (data.success) {
-                messageInput.value = '';
-                loadMessages();
-            } else {
-                console.error('Failed to send:', data);
-            }
+            if (data.success) { messageInput.value = ''; loadMessages(); }
         })
-        .catch(error => console.error('Error sending message:', error));
+        .catch(e => console.error('Error sending message:', e));
     }
-    
-    // Event listeners
-    if (sendButton) {
-        sendButton.addEventListener('click', sendMessage);
-    }
-    
-    if (messageInput) {
-        messageInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-    }
-    
-    // Load messages every 3 seconds
+
+    sendButton?.addEventListener('click', sendMessage);
+    messageInput?.addEventListener('keypress', e => { if(e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+
     loadMessages();
     const interval = setInterval(loadMessages, 3000);
-    
-    // Cleanup interval on page unload
-    window.addEventListener('beforeunload', function() {
-        clearInterval(interval);
-    });
+    window.addEventListener('beforeunload', () => clearInterval(interval));
 </script>
 @endif
 @endsection
