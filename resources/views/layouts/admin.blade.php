@@ -1,4 +1,3 @@
-cat > resources/views/layouts/admin.blade.php << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +20,7 @@ cat > resources/views/layouts/admin.blade.php << 'EOF'
             <div class="p-6">
                 <div class="flex items-center space-x-3 mb-8">
                     <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                        <span class="text-purple-600 text-xl">🏋️</span>
+                        <img src="{{ asset('images/logo.png') }}" alt="Weight Lifting" class="text-purple-600 text-xl">
                     </div>
                     <span class="text-xl font-bold">VirtuGym Admin</span>
                 </div>

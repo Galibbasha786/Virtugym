@@ -3,14 +3,17 @@
 @section('title', $exercise->name)
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="mb-6">
-        <a href="{{ route('exercises.index') }}" class="text-purple-600 hover:text-purple-700">← Back to Exercises</a>
+<div style="max-width:960px;margin:0 auto;">
+    <div style="margin-bottom:1.5rem;" class="fade-in-up">
+        <a href="{{ route('exercises.index') }}" style="color:#c4b5fd;text-decoration:none;font-size:.85rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#c4b5fd'">
+            ← Back to Exercises
+        </a>
     </div>
     
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden fade-in-up">
-        <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-8 text-white">
-            <div class="text-6xl mb-4">
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(139,92,246,.18);border-radius:24px;overflow:hidden;" class="fade-in-up delay-1">
+        {{-- Header --}}
+        <div style="background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(236,72,153,.1));border-bottom:1px solid rgba(139,92,246,.12);padding:2.5rem 2rem;">
+            <div style="font-size:4rem;margin-bottom:1rem;text-shadow:0 0 20px rgba(139,92,246,.4);">
                 @switch($exercise->muscle_group)
                     @case('Chest') 💪 @break
                     @case('Back') 🏋️ @break
@@ -19,35 +22,47 @@
                     @default 🏃
                 @endswitch
             </div>
-            <h1 class="text-3xl font-bold">{{ $exercise->name }}</h1>
-            <div class="flex gap-3 mt-3">
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">{{ $exercise->muscle_group }}</span>
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">{{ $exercise->equipment }}</span>
-                <span class="bg-white/20 px-3 py-1 rounded-full text-sm">{{ $exercise->difficulty }}</span>
+            <h1 style="font-size:2.2rem;font-weight:900;color:#fff;margin-bottom:1rem;">{{ $exercise->name }}</h1>
+            <div style="display:flex;flex-wrap:wrap;gap:.8rem;">
+                <span style="background:rgba(255,255,255,.1);padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:600;color:#e2d9f3;">Muscle: {{ $exercise->muscle_group }}</span>
+                <span style="background:rgba(255,255,255,.1);padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:600;color:#e2d9f3;">Equipment: {{ $exercise->equipment }}</span>
+                <span style="background:rgba(255,255,255,.1);padding:4px 12px;border-radius:8px;font-size:.8rem;font-weight:600;color:#e2d9f3;">Difficulty: {{ $exercise->difficulty }}</span>
             </div>
         </div>
         
-        <div class="p-8">
-            <div class="mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-3">📝 Instructions</h2>
-                <p class="text-gray-700 leading-relaxed">{{ $exercise->instructions }}</p>
+        <div style="padding:2.5rem 2rem;">
+            <div style="margin-bottom:2.5rem;">
+                <h2 style="font-size:1.2rem;font-weight:800;color:#c4b5fd;margin-bottom:.8rem;display:flex;align-items:center;gap:8px;">
+                    📝 Instructions
+                </h2>
+                <div style="background:rgba(0,0,0,.2);border-radius:16px;padding:1.5rem;border:1px solid rgba(255,255,255,.05);">
+                    <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.7;">{{ $exercise->instructions }}</p>
+                </div>
             </div>
             
             @if($exercise->tips)
-            <div class="mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-3">💡 Pro Tips</h2>
-                <p class="text-gray-700">{{ $exercise->tips }}</p>
+            <div style="margin-bottom:2.5rem;">
+                <h2 style="font-size:1.2rem;font-weight:800;color:#fcd34d;margin-bottom:.8rem;display:flex;align-items:center;gap:8px;">
+                    💡 Pro Tips
+                </h2>
+                <div style="background:rgba(245,158,11,.05);border-radius:16px;padding:1.5rem;border:1px solid rgba(245,158,11,.2);">
+                    <p style="font-size:.95rem;color:rgba(255,255,255,.7);line-height:1.7;">{{ $exercise->tips }}</p>
+                </div>
             </div>
             @endif
             
-            <div class="bg-purple-50 rounded-xl p-6 mt-6">
-                <h3 class="font-bold text-purple-800 mb-2">Ready to add this exercise?</h3>
-                <p class="text-purple-700 text-sm mb-4">Add this exercise to your next workout</p>
-                <a href="#?exercise={{ $exercise->id }}" 
-                   class="btn-gradient text-white px-6 py-2 rounded-xl inline-block">
-                    Add to Workout →
-                </a>
-            </div>
+            @if(Auth::user()->role === 'trainer')
+                <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:16px;padding:2rem;text-align:center;">
+                    <h3 style="font-size:1.1rem;font-weight:800;color:#fff;margin-bottom:.5rem;">Ready to add this exercise?</h3>
+                    <p style="color:rgba(255,255,255,.5);font-size:.9rem;margin-bottom:1.5rem;">Add this exercise to a client's workout plan</p>
+                    <a href="{{ route('workouts.create') }}" 
+                       style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;text-decoration:none;padding:12px 24px;border-radius:12px;font-size:.9rem;font-weight:700;box-shadow:0 8px 20px rgba(139,92,246,.35);transition:all .3s;"
+                       onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 14px 30px rgba(139,92,246,.5)'"
+                       onmouseout="this.style.transform='';this.style.boxShadow='0 8px 20px rgba(139,92,246,.35)'">
+                        Add to Workout Plan →
+                    </a>
+                </div>
+            @endif
         </div>
     </div>
 </div>

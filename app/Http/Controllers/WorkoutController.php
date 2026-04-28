@@ -5,58 +5,99 @@ namespace App\Http\Controllers;
 use App\Models\Workout;
 use App\Models\Exercise;
 use App\Models\ExerciseLog;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class WorkoutController extends Controller
 {
-    public function index()
-    {
-        $workouts = Workout::where('user_id', Auth::id())
+public function index()
+{
+    $user = Auth::user();
+    
+    if ($user->role === 'trainer') {
+        // Trainer sees workouts they created
+        $workouts = Workout::where('trainer_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
-        return view('workouts.index', compact('workouts'));
+    } else {
+        // Trainee sees workouts assigned to them
+        $workouts = Workout::where('trainee_id', $user->id)
+            ->orWhere('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
     }
+    
+    return view('workouts.index', compact('workouts'));
+}
     
     public function create()
     {
+        if (Auth::user()->role !== 'trainer') {
+            return redirect()->route('workouts.index')->with('error', 'Only trainers can create workouts.');
+        }
+
         $exercises = Exercise::orderBy('name')->get();
-        return view('workouts.create', compact('exercises'));
+        
+        // Get trainer's clients
+        $clients = Booking::where('trainer_id', Auth::id())
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->with('trainee')
+            ->get()
+            ->pluck('trainee')
+            ->filter()
+            ->unique('id');
+
+        return view('workouts.create', compact('exercises', 'clients'));
     }
     
     public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|string',
-            'difficulty' => 'required|string',
-            'duration_minutes' => 'nullable|integer',
-            'exercises' => 'required|array',
-            'exercises.*.exercise_id' => 'required|exists:exercises,_id',
-            'exercises.*.sets' => 'required|integer|min:1',
-            'exercises.*.reps' => 'required|integer|min:1',
-            'exercises.*.target_weight' => 'nullable|numeric',
-        ]);
-        
-        $workout = Workout::create([
-            'user_id' => Auth::id(),
-            'title' => $request->title,
-            'type' => $request->type,
-            'difficulty' => $request->difficulty,
-            'duration_minutes' => $request->duration_minutes,
-            'exercises' => $request->exercises,
-            'scheduled_date' => $request->scheduled_date ?? now(),
-        ]);
-        
-        return redirect()->route('workouts.show', $workout->id)
-            ->with('success', 'Workout created successfully!');
+{
+    if (Auth::user()->role !== 'trainer') {
+        return redirect()->route('workouts.index')->with('error', 'Only trainers can create workouts.');
     }
+
+    $request->validate([
+        'trainee_id' => 'required|exists:users,_id',
+        'title' => 'required|string|max:255',
+        'type' => 'required|string',
+        'difficulty' => 'required|string',
+        'duration_minutes' => 'nullable|integer',
+        'exercises' => 'required|array',
+        'exercises.*.exercise_id' => 'required|exists:exercises,_id',
+        'exercises.*.sets' => 'required|integer|min:1',
+        'exercises.*.reps' => 'required|integer|min:1',
+        'exercises.*.target_weight' => 'nullable|numeric',
+    ]);
+    
+    $workout = Workout::create([
+        'trainer_id' => Auth::id(),
+        'trainee_id' => $request->trainee_id,
+        'user_id' => $request->trainee_id, // For trainee to view
+        'assigned_by' => Auth::id(),
+        'title' => $request->title,
+        'type' => $request->type,
+        'difficulty' => $request->difficulty,
+        'duration_minutes' => $request->duration_minutes,
+        'exercises' => $request->exercises,
+        'scheduled_date' => $request->scheduled_date ?? now(),
+    ]);
+    
+    return redirect()->route('workouts.show', $workout->id)
+        ->with('success', 'Workout assigned to trainee successfully!');
+}
     
     public function show($id)
     {
-        $workout = Workout::where('user_id', Auth::id())
-            ->findOrFail($id);
+        $user = Auth::user();
+        
+        // Both trainer and trainee should be able to view it
+        $workoutQuery = Workout::where(function($q) use ($user) {
+            $q->where('user_id', $user->id)
+              ->orWhere('trainer_id', $user->id);
+        });
+
+        $workout = $workoutQuery->findOrFail($id);
         
         // Get exercise details
         $exercises = [];
@@ -74,7 +115,7 @@ class WorkoutController extends Controller
         
         // Get existing logs for this workout
         $logs = ExerciseLog::where('workout_id', $workout->id)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $workout->user_id) // Get trainee's logs
             ->get()
             ->keyBy('exercise_id');
         
@@ -83,14 +124,22 @@ class WorkoutController extends Controller
     
     public function edit($id)
     {
-        $workout = Workout::where('user_id', Auth::id())->findOrFail($id);
+        if (Auth::user()->role !== 'trainer') {
+            return redirect()->route('workouts.index')->with('error', 'Only trainers can edit workouts.');
+        }
+
+        $workout = Workout::where('trainer_id', Auth::id())->findOrFail($id);
         $exercises = Exercise::orderBy('name')->get();
         return view('workouts.edit', compact('workout', 'exercises'));
     }
     
     public function update(Request $request, $id)
     {
-        $workout = Workout::where('user_id', Auth::id())->findOrFail($id);
+        if (Auth::user()->role !== 'trainer') {
+            return redirect()->route('workouts.index')->with('error', 'Only trainers can edit workouts.');
+        }
+
+        $workout = Workout::where('trainer_id', Auth::id())->findOrFail($id);
         
         $request->validate([
             'title' => 'required|string|max:255',
@@ -107,7 +156,11 @@ class WorkoutController extends Controller
     
     public function destroy($id)
     {
-        $workout = Workout::where('user_id', Auth::id())->findOrFail($id);
+        if (Auth::user()->role !== 'trainer') {
+            return redirect()->route('workouts.index')->with('error', 'Only trainers can delete workouts.');
+        }
+
+        $workout = Workout::where('trainer_id', Auth::id())->findOrFail($id);
         $workout->delete();
         
         return redirect()->route('workouts.index')
@@ -116,6 +169,7 @@ class WorkoutController extends Controller
     
     public function complete(Request $request, $id)
     {
+        // Trainee completes the workout
         $workout = Workout::where('user_id', Auth::id())->findOrFail($id);
         $workout->update([
             'completed_at' => now(),
@@ -124,6 +178,6 @@ class WorkoutController extends Controller
         ]);
         
         return redirect()->route('workouts.show', $workout->id)
-            ->with('success', 'Great job! Workout completed! 🎉');
+            ->with('success', 'Great job! Workout completed! 🎉 Analytics have been updated.');
     }
 }

@@ -358,6 +358,15 @@
                 <a href="{{ route('analytics.index') }}" class="sidebar-item {{ request()->routeIs('analytics.*') ? 'active' : '' }}">
                     <span class="s-icon">📈</span><span>Analytics</span>
                 </a>
+                <a href="{{ route('workouts.index') }}" class="sidebar-item {{ request()->routeIs('workouts.*') ? 'active' : '' }}">
+                    <span class="s-icon">🏋️</span><span>Workouts</span>
+                </a>
+                <a href="{{ route('exercises.index') }}" class="sidebar-item {{ request()->routeIs('exercises.*') ? 'active' : '' }}">
+                    <span class="s-icon">💪</span><span>Exercises</span>
+                </a>
+                <a href="{{ route('progress.index') }}" class="sidebar-item {{ request()->routeIs('progress.*') ? 'active' : '' }}">
+                    <span class="s-icon">🎯</span><span>Progress</span>
+                </a>
                 <a href="{{ route('chat.index') }}" class="sidebar-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                     <span class="s-icon">💬</span><span>Messages</span>
                     <span id="unreadBadge" class="hidden" style="margin-left:auto;"></span>

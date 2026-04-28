@@ -8,6 +8,9 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\TrainerAvailabilityController;
 use App\Http\Controllers\VideoCallController;
+use App\Http\Controllers\WorkoutController;
+use App\Http\Controllers\ExerciseController;
+use App\Http\Controllers\ProgressController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -46,6 +49,16 @@ Route::middleware(['auth'])->group(function () {
     
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // Workouts
+    Route::resource('workouts', WorkoutController::class);
+    Route::post('/workouts/{id}/complete', [WorkoutController::class, 'complete'])->name('workouts.complete');
+
+    // Exercises
+    Route::resource('exercises', ExerciseController::class);
+
+    // Progress
+    Route::get('/progress', [ProgressController::class, 'index'])->name('progress.index');
     
     // Profile
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
