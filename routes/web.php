@@ -11,6 +11,7 @@ use App\Http\Controllers\VideoCallController;
 use App\Http\Controllers\WorkoutController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\AIController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -64,6 +65,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
+    
+    // ============ AI ROUTES ============
+    Route::prefix('ai')->name('ai.')->group(function () {
+        Route::get('/dashboard', [AIController::class, 'index'])->name('dashboard');
+        Route::get('/recommend-workout', [AIController::class, 'recommendWorkout'])->name('recommend-workout');
+        Route::post('/analyze-form', [AIController::class, 'analyzeForm'])->name('analyze-form');
+        Route::post('/generate-plan', [AIController::class, 'generatePlan'])->name('generate-plan');
+        Route::post('/chat', [AIController::class, 'chat'])->name('chat');
+        Route::get('/nutrition-advice', [AIController::class, 'nutritionAdvice'])->name('nutrition-advice');
+        Route::get('/predict-progress', [AIController::class, 'predictProgress'])->name('predict-progress');
+        Route::get('/motivation', [AIController::class, 'getMotivation'])->name('motivation');
+        Route::get('/workout-summary/{id}', [AIController::class, 'workoutSummary'])->name('workout-summary');
+        // Debug route - remove later
+Route::get('/debug', [AIController::class, 'debug'])->name('debug');
+    });
     
     // ============ ADMIN ROUTES ============
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {

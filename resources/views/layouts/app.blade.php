@@ -372,6 +372,12 @@
                     <span id="unreadBadge" class="hidden" style="margin-left:auto;"></span>
                 </a>
 
+                <!-- AI COACH SIDEBAR LINK -->
+                <a href="{{ route('ai.dashboard') }}" class="sidebar-item {{ request()->routeIs('ai.*') ? 'active' : '' }}">
+                    <span class="s-icon">🤖</span>
+                    <span>AI Coach</span>
+                </a>
+
                 @if(Auth::user()->role == 'trainer')
                 <a href="{{ route('trainer.availability.index') }}" class="sidebar-item {{ request()->routeIs('trainer.availability.*') ? 'active' : '' }}">
                     <span class="s-icon">⏰</span><span>Availability</span>
