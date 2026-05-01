@@ -5,29 +5,29 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
             🤖 AI Fitness Coach
         </h1>
-        <p class="text-gray-600 mt-2">Your personal AI-powered fitness assistant</p>
+        <p class="text-gray-400 mt-2">Your personal AI-powered fitness assistant</p>
         @if(!$aiAvailable)
-            <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mt-4">
-                <p class="text-yellow-700">⚠️ AI features are running in offline mode. Add Gemini API key to enable full AI capabilities.</p>
+            <div class="bg-yellow-900/50 border-l-4 border-yellow-500 p-4 mt-4 rounded-lg">
+                <p class="text-yellow-300">⚠️ AI features are running in offline mode. Add Gemini API key to enable full AI capabilities.</p>
             </div>
         @endif
     </div>
     
     <!-- AI Chat Section -->
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+    <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden mb-8 border border-gray-700">
         <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-4 text-white">
             <h2 class="font-bold text-lg">💬 Chat with VirtuCoach</h2>
             <p class="text-sm opacity-90">Ask me anything about fitness, workouts, or nutrition!</p>
         </div>
         
-        <div id="chatMessages" class="h-96 overflow-y-auto p-4 space-y-3 bg-gray-50">
+        <div id="chatMessages" class="h-96 overflow-y-auto p-4 space-y-3 bg-gray-900/50">
             <div class="flex justify-start">
-                <div class="bg-purple-100 rounded-2xl p-3 max-w-[80%]">
-                    <p class="text-sm">👋 Hi! I'm VirtuCoach, your AI fitness trainer. Ask me about:</p>
-                    <ul class="text-sm mt-1 ml-4">
+                <div class="bg-gray-700 rounded-2xl p-3 max-w-[80%]">
+                    <p class="text-sm text-gray-200">👋 Hi! I'm VirtuCoach, your AI fitness trainer. Ask me about:</p>
+                    <ul class="text-sm mt-1 ml-4 text-gray-300">
                         <li>💪 Personalized workouts</li>
                         <li>🥗 Nutrition advice</li>
                         <li>📊 Progress tips</li>
@@ -37,10 +37,10 @@
             </div>
         </div>
         
-        <div class="p-4 border-t">
+        <div class="p-4 border-t border-gray-700 bg-gray-800/30">
             <div class="flex space-x-2">
                 <input type="text" id="chatInput" placeholder="Ask your fitness question..." 
-                       class="flex-1 px-4 py-2 border rounded-xl focus:outline-none focus:border-purple-500">
+                       class="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-purple-500">
                 <button id="sendChat" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition">
                     Send
                 </button>
@@ -51,89 +51,92 @@
     <!-- Features Grid -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Workout Recommendation -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700">
             <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-xl">💪</div>
-                <h3 class="font-bold text-lg">AI Workout</h3>
+                <div class="w-10 h-10 bg-purple-900/50 rounded-full flex items-center justify-center text-xl">💪</div>
+                <h3 class="font-bold text-lg text-white">AI Workout</h3>
             </div>
-            <div id="workoutRecommendation" class="text-sm text-gray-600">
-                <button onclick="getWorkoutRecommendation()" class="text-purple-600 hover:text-purple-700">
+            <div id="workoutRecommendation" class="text-sm text-gray-300">
+                <button onclick="getWorkoutRecommendation()" class="text-purple-400 hover:text-purple-300 transition">
                     🔄 Generate Personalized Workout
                 </button>
             </div>
         </div>
         
         <!-- Nutrition Advice -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700">
             <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-xl">🥗</div>
-                <h3 class="font-bold text-lg">Nutrition Guide</h3>
+                <div class="w-10 h-10 bg-green-900/50 rounded-full flex items-center justify-center text-xl">🥗</div>
+                <h3 class="font-bold text-lg text-white">Nutrition Guide</h3>
             </div>
-            <div id="nutritionAdvice" class="text-sm text-gray-600">
-                <button onclick="getNutritionAdvice()" class="text-green-600 hover:text-green-700">
+            <div id="nutritionAdvice" class="text-sm text-gray-300">
+                <button onclick="getNutritionAdvice()" class="text-green-400 hover:text-green-300 transition">
                     🔄 Get Personalized Nutrition
                 </button>
             </div>
         </div>
         
         <!-- Progress Prediction -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700">
             <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-xl">📊</div>
-                <h3 class="font-bold text-lg">Progress Forecast</h3>
+                <div class="w-10 h-10 bg-blue-900/50 rounded-full flex items-center justify-center text-xl">📊</div>
+                <h3 class="font-bold text-lg text-white">Progress Forecast</h3>
             </div>
-            <div id="progressPrediction" class="text-sm text-gray-600">
-                <button onclick="getProgressPrediction()" class="text-blue-600 hover:text-blue-700">
+            <div id="progressPrediction" class="text-sm text-gray-300">
+                <button onclick="getProgressPrediction()" class="text-blue-400 hover:text-blue-300 transition">
                     🔄 Predict My Progress
                 </button>
             </div>
         </div>
         
         <!-- Form Analysis -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700">
             <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center text-xl">📹</div>
-                <h3 class="font-bold text-lg">Form Check</h3>
+                <div class="w-10 h-10 bg-yellow-900/50 rounded-full flex items-center justify-center text-xl">📹</div>
+                <h3 class="font-bold text-lg text-white">Form Check</h3>
             </div>
             <div class="space-y-3">
-                <input type="text" id="formExercise" placeholder="Exercise name" class="w-full px-3 py-2 border rounded-lg text-sm">
-                <textarea id="formDescription" rows="2" placeholder="Describe how you perform the exercise..." class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
-                <button onclick="analyzeForm()" class="w-full bg-yellow-500 text-white py-2 rounded-lg text-sm hover:bg-yellow-600">
+                <input type="text" id="formExercise" placeholder="Exercise name" 
+                       class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500">
+                <textarea id="formDescription" rows="2" placeholder="Describe how you perform the exercise..." 
+                          class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500"></textarea>
+                <button onclick="analyzeForm()" class="w-full bg-yellow-600 text-white py-2 rounded-lg text-sm hover:bg-yellow-700 transition">
                     Analyze My Form
                 </button>
             </div>
-            <div id="formAnalysisResult" class="mt-3 text-sm"></div>
+            <div id="formAnalysisResult" class="mt-3 text-sm text-gray-300"></div>
         </div>
         
         <!-- Custom Plan -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700">
             <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xl">📋</div>
-                <h3 class="font-bold text-lg">Custom Plan</h3>
+                <div class="w-10 h-10 bg-orange-900/50 rounded-full flex items-center justify-center text-xl">📋</div>
+                <h3 class="font-bold text-lg text-white">Custom Plan</h3>
             </div>
             <div class="space-y-3">
-                <select id="planGoal" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <select id="planGoal" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-orange-500">
                     <option value="weight_loss">Weight Loss</option>
                     <option value="muscle_gain">Muscle Gain</option>
                     <option value="endurance">Endurance</option>
                     <option value="general_fitness">General Fitness</option>
                 </select>
-                <input type="number" id="planDuration" placeholder="Duration (minutes)" value="30" class="w-full px-3 py-2 border rounded-lg text-sm">
-                <button onclick="generateCustomPlan()" class="w-full bg-orange-500 text-white py-2 rounded-lg text-sm hover:bg-orange-600">
+                <input type="number" id="planDuration" placeholder="Duration (minutes)" value="30" 
+                       class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-orange-500">
+                <button onclick="generateCustomPlan()" class="w-full bg-orange-600 text-white py-2 rounded-lg text-sm hover:bg-orange-700 transition">
                     Generate Plan
                 </button>
             </div>
-            <div id="customPlanResult" class="mt-3 text-sm"></div>
+            <div id="customPlanResult" class="mt-3 text-sm text-gray-300"></div>
         </div>
         
         <!-- Motivation -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700">
             <div class="flex items-center space-x-3 mb-4">
-                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-xl">⚡</div>
-                <h3 class="font-bold text-lg">Daily Motivation</h3>
+                <div class="w-10 h-10 bg-red-900/50 rounded-full flex items-center justify-center text-xl">⚡</div>
+                <h3 class="font-bold text-lg text-white">Daily Motivation</h3>
             </div>
-            <div id="motivation" class="text-sm text-gray-600 italic">
-                <button onclick="getMotivation()" class="text-red-600 hover:text-red-700">
+            <div id="motivation" class="text-sm text-gray-300 italic">
+                <button onclick="getMotivation()" class="text-red-400 hover:text-red-300 transition">
                     🔄 Get Motivation
                 </button>
             </div>
@@ -151,9 +154,9 @@
     
     function addMessage(message, isUser = false) {
         const div = document.createElement('div');
-        div.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+        div.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`;
         div.innerHTML = `
-            <div class="${isUser ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800'} rounded-2xl p-3 max-w-[80%]">
+            <div class="${isUser ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-200'} rounded-2xl p-3 max-w-[80%]">
                 <p class="text-sm whitespace-pre-wrap">${escapeHtml(message)}</p>
             </div>
         `;
@@ -179,17 +182,21 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({ message })
+                body: JSON.stringify({ message: message })
             });
+            
             const data = await response.json();
+            
             if (data.success) {
                 addMessage(data.response);
             } else {
                 addMessage("Sorry, I encountered an error. Please try again.");
             }
         } catch (error) {
+            console.error('Error:', error);
             addMessage("Network error. Please check your connection.");
         }
     }
@@ -202,7 +209,7 @@
     // Workout Recommendation
     async function getWorkoutRecommendation() {
         const container = document.getElementById('workoutRecommendation');
-        container.innerHTML = '<div class="animate-pulse">🤔 Analyzing your profile...</div>';
+        container.innerHTML = '<div class="animate-pulse text-purple-300">🤔 Analyzing your profile...</div>';
         
         try {
             const response = await fetch('/ai/recommend-workout');
@@ -210,19 +217,19 @@
             if (data.success && data.data) {
                 displayWorkoutRecommendation(data.data);
             } else {
-                container.innerHTML = '<p class="text-red-500">Unable to generate recommendation</p><button onclick="getWorkoutRecommendation()" class="text-purple-600 mt-2">Try Again</button>';
+                container.innerHTML = '<p class="text-red-400">Unable to generate recommendation</p><button onclick="getWorkoutRecommendation()" class="text-purple-400 mt-2">Try Again</button>';
             }
         } catch (error) {
-            container.innerHTML = '<p class="text-red-500">Error loading recommendation</p>';
+            container.innerHTML = '<p class="text-red-400">Error loading recommendation</p>';
         }
     }
     
     function displayWorkoutRecommendation(workout) {
         let html = '<div class="space-y-3">';
-        html += `<h4 class="font-bold text-purple-600">${workout.workout_name || 'Your Personalized Workout'}</h4>`;
+        html += `<h4 class="font-bold text-purple-400">${workout.workout_name || 'Your Personalized Workout'}</h4>`;
         
         if (workout.warmup) {
-            html += '<div><strong>🔥 Warm-up:</strong><ul class="ml-4 mt-1">';
+            html += '<div><strong class="text-gray-300">🔥 Warm-up:</strong><ul class="ml-4 mt-1 text-gray-400">';
             workout.warmup.forEach(w => {
                 html += `<li>• ${w.exercise}: ${w.duration} sec</li>`;
             });
@@ -230,7 +237,7 @@
         }
         
         if (workout.exercises) {
-            html += '<div><strong>💪 Main Workout:</strong><ul class="ml-4 mt-1">';
+            html += '<div><strong class="text-gray-300">💪 Main Workout:</strong><ul class="ml-4 mt-1 text-gray-400">';
             workout.exercises.forEach(ex => {
                 html += `<li>• <strong>${ex.name}</strong>: ${ex.sets} sets × ${ex.reps} reps (rest ${ex.rest} sec)</li>`;
             });
@@ -238,7 +245,7 @@
         }
         
         if (workout.cooldown) {
-            html += '<div><strong>🧘 Cool-down:</strong><ul class="ml-4 mt-1">';
+            html += '<div><strong class="text-gray-300">🧘 Cool-down:</strong><ul class="ml-4 mt-1 text-gray-400">';
             workout.cooldown.forEach(c => {
                 html += `<li>• ${c.exercise}: ${c.duration} sec</li>`;
             });
@@ -246,10 +253,10 @@
         }
         
         if (workout.motivation) {
-            html += `<p class="text-purple-600 italic mt-2">✨ "${workout.motivation}"</p>`;
+            html += `<p class="text-purple-400 italic mt-2">✨ "${workout.motivation}"</p>`;
         }
         
-        html += '<button onclick="getWorkoutRecommendation()" class="text-purple-600 text-sm mt-3">⟳ Generate New</button>';
+        html += '<button onclick="getWorkoutRecommendation()" class="text-purple-400 text-sm mt-3 hover:text-purple-300">⟳ Generate New</button>';
         html += '</div>';
         
         document.getElementById('workoutRecommendation').innerHTML = html;
@@ -258,7 +265,7 @@
     // Nutrition Advice
     async function getNutritionAdvice() {
         const container = document.getElementById('nutritionAdvice');
-        container.innerHTML = '<div class="animate-pulse">🥗 Analyzing your needs...</div>';
+        container.innerHTML = '<div class="animate-pulse text-green-300">🥗 Analyzing your needs...</div>';
         
         try {
             const response = await fetch('/ai/nutrition-advice');
@@ -266,26 +273,26 @@
             if (data.success && data.data) {
                 displayNutritionAdvice(data.data);
             } else {
-                container.innerHTML = '<p class="text-red-500">Unable to load advice</p>';
+                container.innerHTML = '<p class="text-red-400">Unable to load advice</p>';
             }
         } catch (error) {
-            container.innerHTML = '<p class="text-red-500">Error loading advice</p>';
+            container.innerHTML = '<p class="text-red-400">Error loading advice</p>';
         }
     }
     
     function displayNutritionAdvice(nutrition) {
-        let html = '<div class="space-y-2">';
-        html += `<p><strong>🔥 Calories:</strong> ${nutrition.daily_calories || '2000-2200'}</p>`;
-        html += `<p><strong>🥩 Protein:</strong> ${nutrition.protein || '150-180g'} | <strong>🍚 Carbs:</strong> ${nutrition.carbs || '200-250g'} | <strong>🥑 Fats:</strong> ${nutrition.fats || '50-60g'}</p>`;
+        let html = '<div class="space-y-2 text-gray-300">';
+        html += `<p><strong class="text-gray-200">🔥 Calories:</strong> ${nutrition.daily_calories || '2000-2200'}</p>`;
+        html += `<p><strong class="text-gray-200">🥩 Protein:</strong> ${nutrition.protein || '150-180g'} | <strong class="text-gray-200">🍚 Carbs:</strong> ${nutrition.carbs || '200-250g'} | <strong class="text-gray-200">🥑 Fats:</strong> ${nutrition.fats || '50-60g'}</p>`;
         if (nutrition.meal_ideas) {
-            html += '<p><strong>🍽️ Meal Ideas:</strong></p><ul class="ml-4">';
+            html += '<p><strong class="text-gray-200">🍽️ Meal Ideas:</strong></p><ul class="ml-4">';
             nutrition.meal_ideas.forEach(meal => {
                 html += `<li>• ${meal}</li>`;
             });
             html += '</ul>';
         }
-        html += `<p class="text-green-600 italic mt-2">💧 ${nutrition.hydration || 'Drink 2-3L water daily'}</p>`;
-        html += '<button onclick="getNutritionAdvice()" class="text-green-600 text-sm mt-2">⟳ Refresh</button>';
+        html += `<p class="text-green-400 italic mt-2">💧 ${nutrition.hydration || 'Drink 2-3L water daily'}</p>`;
+        html += '<button onclick="getNutritionAdvice()" class="text-green-400 text-sm mt-2 hover:text-green-300">⟳ Refresh</button>';
         html += '</div>';
         
         document.getElementById('nutritionAdvice').innerHTML = html;
@@ -294,7 +301,7 @@
     // Progress Prediction
     async function getProgressPrediction() {
         const container = document.getElementById('progressPrediction');
-        container.innerHTML = '<div class="animate-pulse">📊 Analyzing your data...</div>';
+        container.innerHTML = '<div class="animate-pulse text-blue-300">📊 Analyzing your data...</div>';
         
         try {
             const response = await fetch('/ai/predict-progress');
@@ -302,27 +309,27 @@
             if (data.success && data.data) {
                 displayProgressPrediction(data.data);
             } else {
-                container.innerHTML = '<p class="text-red-500">Unable to predict</p>';
+                container.innerHTML = '<p class="text-red-400">Unable to predict</p>';
             }
         } catch (error) {
-            container.innerHTML = '<p class="text-red-500">Error loading prediction</p>';
+            container.innerHTML = '<p class="text-red-400">Error loading prediction</p>';
         }
     }
     
     function displayProgressPrediction(prediction) {
-        let html = '<div class="space-y-2">';
-        html += `<p><strong>⏰ Weeks to goal:</strong> ${prediction.weeks_to_goal || '8-12'} weeks</p>`;
-        html += `<p><strong>📈 Confidence:</strong> ${prediction.confidence_percentage || '75'}%</p>`;
-        html += `<p><strong>💪 Recommended frequency:</strong> ${prediction.recommended_frequency || '4'} days/week</p>`;
+        let html = '<div class="space-y-2 text-gray-300">';
+        html += `<p><strong class="text-gray-200">⏰ Weeks to goal:</strong> ${prediction.weeks_to_goal || '8-12'} weeks</p>`;
+        html += `<p><strong class="text-gray-200">📈 Confidence:</strong> ${prediction.confidence_percentage || '75'}%</p>`;
+        html += `<p><strong class="text-gray-200">💪 Recommended frequency:</strong> ${prediction.recommended_frequency || '4'} days/week</p>`;
         if (prediction.suggestions) {
-            html += '<p><strong>💡 Suggestions:</strong></p><ul class="ml-4">';
+            html += '<p><strong class="text-gray-200">💡 Suggestions:</strong></p><ul class="ml-4">';
             prediction.suggestions.forEach(s => {
                 html += `<li>• ${s}</li>`;
             });
             html += '</ul>';
         }
-        html += `<p class="text-blue-600 italic mt-2">✨ "${prediction.motivation_quote || 'Stay consistent, you got this!'}"</p>`;
-        html += '<button onclick="getProgressPrediction()" class="text-blue-600 text-sm mt-2">⟳ Refresh</button>';
+        html += `<p class="text-blue-400 italic mt-2">✨ "${prediction.motivation_quote || 'Stay consistent, you got this!'}"</p>`;
+        html += '<button onclick="getProgressPrediction()" class="text-blue-400 text-sm mt-2 hover:text-blue-300">⟳ Refresh</button>';
         html += '</div>';
         
         document.getElementById('progressPrediction').innerHTML = html;
@@ -339,7 +346,7 @@
         }
         
         const resultDiv = document.getElementById('formAnalysisResult');
-        resultDiv.innerHTML = '<div class="animate-pulse text-center">🔍 Analyzing your form...</div>';
+        resultDiv.innerHTML = '<div class="animate-pulse text-center text-yellow-300">🔍 Analyzing your form...</div>';
         
         try {
             const response = await fetch('/ai/analyze-form', {
@@ -354,42 +361,42 @@
             if (data.success && data.data) {
                 displayFormAnalysis(data.data);
             } else {
-                resultDiv.innerHTML = '<p class="text-red-500">Analysis failed</p>';
+                resultDiv.innerHTML = '<p class="text-red-400">Analysis failed</p>';
             }
         } catch (error) {
-            resultDiv.innerHTML = '<p class="text-red-500">Error analyzing form</p>';
+            resultDiv.innerHTML = '<p class="text-red-400">Error analyzing form</p>';
         }
     }
     
     function displayFormAnalysis(analysis) {
-        let html = '<div class="mt-3 space-y-2 border-t pt-3">';
-        html += `<p><strong>✅ Form Quality:</strong> <span class="font-semibold">${analysis.form_quality || 'Good'}</span></p>`;
+        let html = '<div class="mt-3 space-y-2 border-t border-gray-700 pt-3">';
+        html += `<p><strong class="text-gray-200">✅ Form Quality:</strong> <span class="font-semibold text-yellow-400">${analysis.form_quality || 'Good'}</span></p>`;
         
         if (analysis.correct_points) {
-            html += '<p><strong>👍 What you\'re doing right:</strong></p><ul class="ml-4">';
+            html += '<p><strong class="text-gray-200">👍 What you\'re doing right:</strong></p><ul class="ml-4">';
             analysis.correct_points.forEach(p => {
-                html += `<li class="text-green-600">✓ ${p}</li>`;
+                html += `<li class="text-green-400">✓ ${p}</li>`;
             });
             html += '</ul>';
         }
         
         if (analysis.corrections) {
-            html += '<p><strong>📝 How to improve:</strong></p><ul class="ml-4">';
+            html += '<p><strong class="text-gray-200">📝 How to improve:</strong></p><ul class="ml-4">';
             analysis.corrections.forEach(c => {
-                html += `<li class="text-blue-600">→ ${c}</li>`;
+                html += `<li class="text-blue-400">→ ${c}</li>`;
             });
             html += '</ul>';
         }
         
         if (analysis.tips) {
-            html += '<p><strong>💡 Pro Tips:</strong></p><ul class="ml-4">';
+            html += '<p><strong class="text-gray-200">💡 Pro Tips:</strong></p><ul class="ml-4">';
             analysis.tips.forEach(t => {
                 html += `<li>• ${t}</li>`;
             });
             html += '</ul>';
         }
         
-        html += `<p class="text-purple-600 italic mt-2">✨ ${analysis.encouragement || 'Keep practicing, you\'re improving!'}</p>`;
+        html += `<p class="text-purple-400 italic mt-2">✨ ${analysis.encouragement || 'Keep practicing, you\'re improving!'}</p>`;
         html += '</div>';
         
         document.getElementById('formAnalysisResult').innerHTML = html;
@@ -401,7 +408,7 @@
         const duration = document.getElementById('planDuration').value;
         
         const resultDiv = document.getElementById('customPlanResult');
-        resultDiv.innerHTML = '<div class="animate-pulse text-center">📋 Generating your plan...</div>';
+        resultDiv.innerHTML = '<div class="animate-pulse text-center text-orange-300">📋 Generating your plan...</div>';
         
         try {
             const response = await fetch('/ai/generate-plan', {
@@ -416,21 +423,21 @@
             if (data.success && data.data) {
                 displayCustomPlan(data.data);
             } else {
-                resultDiv.innerHTML = '<p class="text-red-500">Plan generation failed</p>';
+                resultDiv.innerHTML = '<p class="text-red-400">Plan generation failed</p>';
             }
         } catch (error) {
-            resultDiv.innerHTML = '<p class="text-red-500">Error generating plan</p>';
+            resultDiv.innerHTML = '<p class="text-red-400">Error generating plan</p>';
         }
     }
     
     function displayCustomPlan(plan) {
-        let html = '<div class="mt-3 space-y-2 border-t pt-3">';
-        html += `<h4 class="font-bold text-orange-600">${plan.plan_name || 'Your Custom Plan'}</h4>`;
-        html += `<p><strong>⚡ Difficulty:</strong> ${plan.difficulty || 'Intermediate'}</p>`;
+        let html = '<div class="mt-3 space-y-2 border-t border-gray-700 pt-3">';
+        html += `<h4 class="font-bold text-orange-400">${plan.plan_name || 'Your Custom Plan'}</h4>`;
+        html += `<p class="text-gray-300"><strong class="text-gray-200">⚡ Difficulty:</strong> ${plan.difficulty || 'Intermediate'}</p>`;
         
         if (plan.circuits) {
             plan.circuits.forEach((circuit, idx) => {
-                html += `<div class="mt-2"><strong>Circuit ${idx + 1}:</strong> ${circuit.rounds} rounds</div><ul class="ml-4">`;
+                html += `<div class="mt-2"><strong class="text-gray-200">Circuit ${idx + 1}:</strong> ${circuit.rounds} rounds</div><ul class="ml-4 text-gray-300">`;
                 circuit.exercises.forEach(ex => {
                     html += `<li>• ${ex.name}: ${ex.reps} reps (rest ${ex.rest} sec)</li>`;
                 });
@@ -439,14 +446,14 @@
         }
         
         if (plan.tips) {
-            html += '<p><strong>💡 Tips for success:</strong></p><ul class="ml-4">';
+            html += '<p><strong class="text-gray-200">💡 Tips for success:</strong></p><ul class="ml-4 text-gray-300">';
             plan.tips.forEach(tip => {
                 html += `<li>• ${tip}</li>`;
             });
             html += '</ul>';
         }
         
-        html += '<button onclick="generateCustomPlan()" class="text-orange-600 text-sm mt-2">⟳ Generate New Plan</button>';
+        html += '<button onclick="generateCustomPlan()" class="text-orange-400 text-sm mt-2 hover:text-orange-300">⟳ Generate New Plan</button>';
         html += '</div>';
         
         document.getElementById('customPlanResult').innerHTML = html;
@@ -455,21 +462,21 @@
     // Motivation
     async function getMotivation() {
         const container = document.getElementById('motivation');
-        container.innerHTML = '<div class="animate-pulse">✨ Finding inspiration...</div>';
+        container.innerHTML = '<div class="animate-pulse text-center text-red-300">✨ Finding inspiration...</div>';
         
         try {
             const response = await fetch('/ai/motivation');
             const data = await response.json();
             if (data.success) {
                 container.innerHTML = `<div class="text-center">
-                    <p class="text-red-600 italic text-base font-medium">"${data.quote}"</p>
-                    <button onclick="getMotivation()" class="text-red-600 text-sm mt-3">⟳ New Quote</button>
+                    <p class="text-red-400 italic text-base font-medium">"${data.quote}"</p>
+                    <button onclick="getMotivation()" class="text-red-400 text-sm mt-3 hover:text-red-300">⟳ New Quote</button>
                 </div>`;
             } else {
-                container.innerHTML = '<p class="text-red-500">Unable to get quote</p>';
+                container.innerHTML = '<p class="text-red-400">Unable to get quote</p>';
             }
         } catch (error) {
-            container.innerHTML = '<p class="text-red-500">Error loading motivation</p>';
+            container.innerHTML = '<p class="text-red-400">Error loading motivation</p>';
         }
     }
 </script>

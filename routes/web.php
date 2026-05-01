@@ -82,13 +82,25 @@ Route::get('/debug', [AIController::class, 'debug'])->name('debug');
     });
     
     // ============ ADMIN ROUTES ============
-    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
-        Route::get('/trainers', [AdminDashboardController::class, 'trainers'])->name('trainers');
-        Route::post('/trainers/{id}/verify', [AdminDashboardController::class, 'verifyTrainer'])->name('trainers.verify');
-        Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings');
-    });
+    // Admin Routes
+Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/users', [AdminDashboardController::class, 'users'])->name('users');
+    Route::post('/users/{id}/block', [AdminDashboardController::class, 'blockUser'])->name('users.block');
+    Route::delete('/users/{id}/delete', [AdminDashboardController::class, 'deleteUser'])->name('users.delete');
+    
+    Route::get('/trainers', [AdminDashboardController::class, 'trainers'])->name('trainers');
+    Route::post('/trainers/{id}/verify', [AdminDashboardController::class, 'verifyTrainer'])->name('trainers.verify');
+    Route::post('/trainers/{id}/unverify', [AdminDashboardController::class, 'unverifyTrainer'])->name('trainers.unverify');
+    Route::delete('/trainers/{id}/delete', [AdminDashboardController::class, 'deleteTrainer'])->name('trainers.delete');
+    
+    Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings');
+    Route::delete('/bookings/{id}/delete', [AdminDashboardController::class, 'deleteBooking'])->name('bookings.delete');
+    
+    Route::get('/withdrawals', [AdminDashboardController::class, 'withdrawals'])->name('withdrawals');
+    Route::post('/withdrawals/{id}/approve', [AdminDashboardController::class, 'approveWithdrawal'])->name('withdrawals.approve');
+    Route::post('/withdrawals/{id}/reject', [AdminDashboardController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
+});
     
     // ============ TRAINER ROUTES ============
     Route::prefix('trainer')->name('trainer.')->middleware(['role:trainer'])->group(function () {
@@ -101,6 +113,8 @@ Route::get('/debug', [AIController::class, 'debug'])->name('debug');
         Route::get('/availability', [TrainerAvailabilityController::class, 'index'])->name('availability.index');
         Route::post('/availability', [TrainerAvailabilityController::class, 'store'])->name('availability.store');
         Route::delete('/availability/{id}', [TrainerAvailabilityController::class, 'destroy'])->name('availability.destroy');
+        Route::get('/withdrawals', [TrainerDashboardController::class, 'withdrawalRequests'])->name('withdrawals');
+Route::post('/withdrawal/request', [TrainerDashboardController::class, 'requestWithdrawal'])->name('withdrawal.request');
     });
     
     // ============ TRAINEE ROUTES ============

@@ -352,6 +352,23 @@
         <div style="padding:1.2rem 1rem;">
             <p style="font-size:.65rem;color:rgba(255,255,255,.2);font-weight:700;letter-spacing:.12em;padding:0 8px;margin-bottom:.6rem;">MAIN</p>
             <nav style="display:flex;flex-direction:column;">
+                @if(Auth::user()->role == 'admin')
+                <a href="{{ route('admin.dashboard') }}" class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <span class="s-icon">📊</span><span>Dashboard</span>
+                </a>
+                <a href="{{ route('admin.users') }}" class="sidebar-item {{ request()->routeIs('admin.users') ? 'active' : '' }}">
+                    <span class="s-icon">👥</span><span>Users</span>
+                </a>
+                <a href="{{ route('admin.trainers') }}" class="sidebar-item {{ request()->routeIs('admin.trainers') ? 'active' : '' }}">
+                    <span class="s-icon">🏋️</span><span>Trainers</span>
+                </a>
+                <a href="{{ route('admin.bookings') }}" class="sidebar-item {{ request()->routeIs('admin.bookings') ? 'active' : '' }}">
+                    <span class="s-icon">📅</span><span>Bookings</span>
+                </a>
+                <a href="{{ route('admin.withdrawals') }}" class="sidebar-item {{ request()->routeIs('admin.withdrawals') ? 'active' : '' }}">
+                    <span class="s-icon">💰</span><span>Withdrawals</span>
+                </a>
+                @else
                 <a href="{{ route('dashboard') }}" class="sidebar-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     <span class="s-icon">📊</span><span>Dashboard</span>
                 </a>
@@ -385,12 +402,16 @@
                 <a href="{{ route('bookings.index') }}" class="sidebar-item {{ request()->routeIs('bookings.*') ? 'active' : '' }}">
                     <span class="s-icon">📅</span><span>Bookings</span>
                 </a>
+                <a href="{{ route('trainer.withdrawals') }}" class="sidebar-item {{ request()->routeIs('trainer.withdrawals') ? 'active' : '' }}">
+                    <span class="s-icon">💰</span><span>Withdrawals</span>
+                </a>
                 @endif
 
                 @if(Auth::user()->role == 'trainee')
                 <a href="{{ route('bookings.index') }}" class="sidebar-item {{ request()->routeIs('bookings.*') ? 'active' : '' }}">
                     <span class="s-icon">📅</span><span>My Sessions</span>
                 </a>
+                @endif
                 @endif
             </nav>
 
